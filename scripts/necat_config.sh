@@ -1,11 +1,11 @@
 
-# reads file = $1
+Reads=$1
+OutDir=$2
 
-export PATH=$PATH:/mnt/shared/scratch/jnprice/apps/NECAT/Linux-amd64/bin
+Prefix=$(basename "$Reads" .fastq.gz)
 
-fileshort=$(basename $1 | sed s/".fastq.gz"//g)
-mkdir $fileshort
-cd $fileshort
-realpath $1 > read_list.txt
-necat.pl config "$fileshort"_config.txt
+mkdir -p "$OutDir/$Prefix"
+
+realpath "$Reads" > "$OutDir/$Prefix"/read_list.txt
+necat config "$OutDir/$Prefix"/"$Prefix"_config.txt
 

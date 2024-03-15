@@ -1,0 +1,17 @@
+name: ont_assembly
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - porechop
+  - nanoplot
+  - filtlong
+  - necat
+  - racon
+  - medaka
+  - busco
+  - purge_dups
+  - fastqc
+  - trimmomatic
+  - pilon

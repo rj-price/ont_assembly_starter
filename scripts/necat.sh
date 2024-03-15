@@ -2,7 +2,7 @@
 #SBATCH -J necat
 #SBATCH --partition=long
 #SBATCH --mem=80G
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=12
 
 # necat config = $1
 
