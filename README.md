@@ -59,22 +59,18 @@ sbatch "$scripts_dir"/filtlong.sh \
 ## NECAT
 **Used to correct and assemble ONT reads into contigs.**
 
-Generate config files
+Set the trimmed reads and output directories (change these to the actual paths):
 ```bash
-bash /home/pricej/scripts/genome_assembly/necat_config.sh $file
+reads_dir=/dir/to/filtlong_out
+out_dir=/dir/to/output
 ```
 
-Edit config files as below
-```
-PROJECT=<strain>
-ONT_READ_LIST=read_list.txt
-GENOME_SIZE=50000000
-THREADS=16
-```
-
-Run assembly
-```
-sbatch /home/pricej/scripts/genome_assembly/necat.sh {config}
+Run assembly for 16Mb genome:
+```bash
+sbatch "$scripts_dir"/necat.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    16000000 \
+    "$out_dir"
 ```
 
 ### Polish NECAT assemblies with long reads using Racon 
