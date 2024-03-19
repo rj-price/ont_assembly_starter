@@ -97,3 +97,22 @@ sbatch ~/scratch/private/scripts/genome_assembly/purge_dups.sh /mnt/shared/scrat
 ```
 
 ### Polish with Illumina data
+
+
+# OR...
+
+## Run full ONT pipeline
+
+Set the reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/reads
+out_dir=/dir/to/output
+```
+
+Run full ONT assembly pipeline for 16Mb genome:
+```bash
+sbatch "$scripts_dir"/assembly.sh \
+    "$reads_dir" \
+    16000000 \
+    "$out_dir"
+```
