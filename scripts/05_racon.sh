@@ -11,7 +11,7 @@ Iterations=$3
 OutDir=$4
 
 # CHECK INPUTS
-if [[ -d "$ReadsDir" && -n "$Assembly" && -n "$Iterations" && -n "$OutDir" ]]; then
+if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -f "$Assembly" && -n "$Iterations" && -n "$OutDir" ]]; then
     # CREATE OUTPUT FOLDER
     mkdir -p "$OutDir"
 
@@ -23,7 +23,7 @@ if [[ -d "$ReadsDir" && -n "$Assembly" && -n "$Iterations" && -n "$OutDir" ]]; t
 
 else
     # PRINT ERROR & USAGE MESSAGES
-    echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), a minimum read length (in bp), a minimum quality score (integer) and an output directory. \n"
-    echo -e "Usage: sbatch racon.sh <fastq_file.fastq.gz> <assembly.fasta> <number of iterations> <output_directory> \n"
+    echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), a NECAT assembly (.fasta required), a number of iterations (integer) and an output directory. \n"
+    echo -e "Usage: sbatch 05_racon.sh <fastq_file.fastq.gz> <assembly.fasta> <number_of_iterations> <output_directory> \n"
     exit 1
 fi

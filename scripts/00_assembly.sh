@@ -120,7 +120,7 @@ medaka_consensus \
     -i $OutDir/$Prefix/"$Prefix"_filt.fastq.gz \
     -d $OutDir/$Prefix/longpolish/"$Prefix"_racon.fasta \
     -o $OutDir/$Prefix/longpolish \
-    -t 12 -m r1041_e82_400bps_sup_g615
+    -t 12 -m r941_min_high_g360
 
 cp $OutDir/$Prefix/longpolish/consensus.fasta $OutDir/$Prefix/final/"$Prefix"_medaka.fasta
 

@@ -22,6 +22,6 @@ if [[ -d "$ReadsDir" && -n "$OutDir" && -n "$Prefix" ]]; then
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a directory containing passed ONT FASTQ files, an output directory and a sample name. \n"
-    echo -e "Usage: sbatch porechop.sh <reads_directory> <output_directory> <sample_name> \n"
+    echo -e "Usage: sbatch 01_porechop.sh <reads_directory> <output_directory> <sample_name> \n"
     exit 1
 fi

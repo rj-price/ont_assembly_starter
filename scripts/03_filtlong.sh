@@ -11,7 +11,7 @@ MinQual=$3
 OutDir=$4
 
 # CHECK INPUTS
-if [[ -d "$ReadsDir" && -n "$MinLength" && -n "$MinQual" && -n "$OutDir" ]]; then
+if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -n "$MinLength" && -n "$MinQual" && -n "$OutDir" ]]; then
     # CREATE OUTPUT FOLDER
     mkdir -p "$OutDir"
 
@@ -29,6 +29,6 @@ if [[ -d "$ReadsDir" && -n "$MinLength" && -n "$MinQual" && -n "$OutDir" ]]; the
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), a minimum read length (in bp), a minimum quality score (integer) and an output directory. \n"
-    echo -e "Usage: sbatch filtlong.sh <fastq_file.fastq.gz> <minimum_read_length> <minimum_quality_score> <output_directory> \n"
+    echo -e "Usage: sbatch 03_filtlong.sh <fastq_file.fastq.gz> <minimum_read_length> <minimum_quality_score> <output_directory> \n"
     exit 1
 fi

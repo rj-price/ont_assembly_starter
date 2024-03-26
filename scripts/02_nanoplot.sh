@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=2
 
 # INPUTS
-FASTQ=$1
+Reads=$1
 OutDir=$2
 
 # CHECK INPUTS
@@ -14,10 +14,10 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -n "$OutDir" ]]; then
     mkdir -p "$OutDir"
 
     # RUN NANOPLOT
-    NanoPlot -t 2 --fastq "$FASTQ" -o "$OutDir"
+    NanoPlot -t 2 --fastq "$Reads" -o "$OutDir"
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required) and an output directory. \n"
-    echo -e "Usage: sbatch nanoplot.sh <fastq_file.fastq.gz> <output_directory> \n"
+    echo -e "Usage: sbatch 02_nanoplot.sh <fastq_file.fastq.gz> <output_directory> \n"
     exit 1
 fi

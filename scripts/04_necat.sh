@@ -40,6 +40,6 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -n "$GenomeSize" && -n "$Ou
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), an estimated genome length (in bp) and an output directory. \n"
-    echo -e "Usage: sbatch necat.sh <fastq_file.fastq.gz> <estimated_genome_size> <output_directory> \n"
+    echo -e "Usage: sbatch 04_necat.sh <fastq_file.fastq.gz> <estimated_genome_size> <output_directory> \n"
     exit 1
 fi
