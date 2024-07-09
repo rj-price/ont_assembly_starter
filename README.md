@@ -1,121 +1,175 @@
-# Assembly of Fusarium Genomes
+# ont_assembly_starter
 
-## On NIAB HPC
+## Getting Started
 
-### Location of raw reads
-```
-/main/temp-archives/2022_camb_nanopore/Fusarium_new/AJ174/basecalling/pass/
-/main/temp-archives/2022_camb_nanopore/Fusarium_new/AJ592/basecalling/pass/
-/main/temp-archives/2021_camb_nanopore/Fusarium_new/AJ28/basecalling/pass/
-/main/temp-archives/2021_camb_nanopore/Fusarium_new/AJ705/basecalling/pass/
-```
+### Installation
+Installing the analysis environment requires conda to be installed first.
 
-### Use Porechop to trim super high accuracy reads
-```
-for folder in /main/temp-archives/2022_camb_nanopore/Fusarium_new/*;
-    do foldershort=$(basename $folder)
-    sbatch /home/pricej/scripts/genome_assembly/porechop.sh $folder/basecalling/pass/ /scratch/projects/pricej/fusarium/porechop/$foldershort.fastq
-    done
-
-for folder in /main/temp-archives/2021_camb_nanopore/Fusarium_new/*;
-    do foldershort=$(basename $folder)
-    sbatch /home/pricej/scripts/genome_assembly/porechop.sh $folder/basecalling/pass/ /scratch/projects/pricej/fusarium/porechop/$foldershort.fastq
-    done
- ```
-
-### Gzip trimmed fastq files
-```
-for file in *fastq; do gzip $file; done
+To install the pipeline:
+```bash
+# Get pipeline
+git clone https://github.com/rj-price/ont_assembly_starter.git 
+# Change to directory
+cd ont_assembly_starter
+# Create conda environment with all dependencies
+conda env create -f environment.yml
+# Activate environment
+conda activate ont_assembly
 ```
 
-### Use NanoPlot on new read sets to QC
-```
-for file in /scratch/projects/pricej/fusarium/porechop/*.fastq.gz;
-    do fileshort=$(basename $file | sed s/".fastq.gz"//g)
-    sbatch /home/pricej/scripts/genome_assembly/nanoplot_fastq.sh $file /scratch/projects/pricej/fusarium/nanoplot/$fileshort/
-    done
+### Input
+This assembly pipeline processes Oxford Nanopore long-read data.
+
+### Output
+The main output from this pipeline is a long-read only assembly with quality metrics.
+
+<br>
+
+# Genome Assembly of ONT data
+
+Environmental variable (change this to actual path):
+```bash
+scripts_dir=/dir/to/ont_assembly_starter/scripts
 ```
 
-### Filter out reads under 1kb with Filtlong
-```
-for file in /scratch/projects/pricej/fusarium/porechop/*.fastq.gz;
-    do fileshort=$(basename $file | sed s/".fastq.gz"//g)
-    sbatch /home/pricej/scripts/genome_assembly/filtlong_1kb.sh $file $fileshort
-    done
+## Porechop
+**Used to trim sequencing adapters from ONT reads.**
+
+Set the reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/reads
+out_dir=/dir/to/output
 ```
 
-### Assemble genomes using NECAT
-Generate config files
-```
-for file in /scratch/projects/pricej/fusarium/filtlong/*_1kb.fastq.gz; 
-    do bash /home/pricej/scripts/genome_assembly/necat_config.sh $file
-    done
-```
-
-Edit config files as below
-```
-PROJECT=<strain>
-ONT_READ_LIST=read_list.txt
-GENOME_SIZE=50000000
-THREADS=16
+To run on a directory of reads:
+```bash
+sbatch "$scripts_dir"/01_porechop.sh \
+    "$reads_dir" \
+    "$out_dir" \
+    sample_name
 ```
 
-Run assembly
-```
-sbatch /home/pricej/scripts/genome_assembly/necat.sh {config}
+## NanoPlot
+**Used to produce read QC metrics and plots.**
+
+Set the trimmed reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/porechop_out
+out_dir=/dir/to/output
 ```
 
-## On Crop Diversity HPC
-
-### Transfer everything to Crop Diversity HPC
-```
-rsync -avP /scratch/projects/pricej/fusarium/ jnprice@gruffalo.cropdiversity.ac.uk:/mnt/shared/scratch/jnprice/fusarium
-```
-
-### Polish NECAT assemblies with long reads using Racon 
-x1
-```
-for file in /mnt/shared/scratch/jnprice/fusarium/necat/*.fasta; 
-    do fileshort=$(basename $file | sed s/".fasta"//g)
-    sbatch /mnt/shared/scratch/jnprice/private/scripts/genome_assembly/racon.sh 1 /mnt/shared/scratch/jnprice/fusarium/filtlong/"$fileshort"_1kb.fastq.gz $file
-    done
+To run on a single trimmed reads file:
+```bash
+sbatch "$scripts_dir"/02_nanoplot.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    "$out_dir"
 ```
 
-x2
-```
-for file in /mnt/shared/scratch/jnprice/fusarium/necat/*.fasta; 
-    do fileshort=$(basename $file | sed s/".fasta"//g)
-    sbatch /mnt/shared/scratch/jnprice/private/scripts/genome_assembly/racon.sh 2 /mnt/shared/scratch/jnprice/fusarium/filtlong/"$fileshort"_1kb.fastq.gz $file
-    done
+## Filtlong
+**Used to remove reads under a specified read length and quality score.**
+
+Set the trimmed reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/porechop_out
+out_dir=/dir/to/output
 ```
 
-x3
-```
-for file in /mnt/shared/scratch/jnprice/fusarium/necat/*.fasta; 
-    do fileshort=$(basename $file | sed s/".fasta"//g)
-    sbatch /mnt/shared/scratch/jnprice/private/scripts/genome_assembly/racon.sh 3 /mnt/shared/scratch/jnprice/fusarium/filtlong/"$fileshort"_1kb.fastq.gz $file
-    done
-```
-
-### Polish x1 Racon assemblies with Medaka
-```
-for file in /mnt/shared/scratch/jnprice/fusarium/racon_x1/*_racon.fasta; 
-    do fileshort=$(basename $file | sed s/"_racon.fasta"//g)
-    sbatch /mnt/shared/scratch/jnprice/private/scripts/genome_assembly/medaka.sh /mnt/shared/scratch/jnprice/fusarium/filtlong/"$fileshort"_1kb.fastq.gz $file
-    done
+To run on a single reads file with a minimum read length of 1kb and a minimum quality score of Q12:
+```bash
+sbatch "$scripts_dir"/03_filtlong.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    1000 \
+    12 \
+    "$out_dir"
 ```
 
-### Purge haplotigs from assemblies with purge_dups
-```
-for file in /mnt/shared/scratch/jnprice/fusarium/filtlong/*_1kb.fastq.gz;
-    do fileshort=$(basename $file | sed s/"_1kb.fastq.gz"//g)
-    sbatch ~/scratch/private/scripts/genome_assembly/purge_dups.sh /mnt/shared/scratch/jnprice/fusarium/medaka/"$fileshort"*.fasta $file
-    done
+## NECAT
+**Used to correct and assemble ONT reads into contigs.**
+
+Set the filtered reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/filtlong_out
+out_dir=/dir/to/output
 ```
 
-### QC with BUSCO at each stage of assembly process
+Run assembly for 16Mb genome:
+```bash
+sbatch "$scripts_dir"/04_necat.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    16000000 \
+    "$out_dir"
 ```
-for file in *fasta;
-    do sbatch /mnt/shared/scratch/jnprice/private/scripts/busco_hypocreales.sh $file;
-    done
+
+## Racon 
+**Used to polish NECAT assemblies with long reads.**
+
+Set the filtered reads, NECAT assembly and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/filtlong_out
+necat_dir=/dir/to/necat_out
+out_dir=/dir/to/output
+```
+
+Run on NECAT assembly with one iteration:
+```bash
+sbatch "$scripts_dir"/05_racon.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    "$necat_dir"/sample_name_necat.fasta \
+    1 \
+    "$out_dir"
+```
+
+## Medaka
+**Used to polish Racon assemblies with long reads.**
+
+Set the filtered reads, Racon assembly and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/filtlong_out
+racon_dir=/dir/to/racon_out
+out_dir=/dir/to/output
+```
+
+Run on Racon assembly:
+```bash
+sbatch "$scripts_dir"/06_medaka.sh \
+    "$reads_dir"/sample_name.fastq.gz \
+    "$racon_dir"/sample_name_necat_racon.fasta \
+    "$out_dir"
+```
+
+## BUSCO
+**Used as a quality control step to check number of conserved single copy orthologs present in assembly.**
+
+Set the assembly and output directories (change these to the actual paths):
+```bash
+medaka_dir=/dir/to/medaka_out
+out_dir=/dir/to/output
+```
+
+Run on assembly file with the lineage fungi:
+```bash
+sbatch "$scripts_dir"/XX_busco.sh \
+    "$medaka_dir"/sample_name_necat_racon_medaka.fasta \
+    fungi \
+    "$out_dir"
+```
+
+<br>
+
+# OR...
+
+## Run full ONT pipeline
+
+Set the reads and output directories (change these to the actual paths):
+```bash
+reads_dir=/dir/to/reads
+out_dir=/dir/to/output
+```
+
+Run full ONT assembly pipeline for 16Mb genome:
+```bash
+sbatch "$scripts_dir"/00_assembly.sh \
+    "$reads_dir" \
+    16000000 \
+    "$out_dir"
 ```
