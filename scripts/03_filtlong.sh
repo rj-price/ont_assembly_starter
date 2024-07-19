@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #SBATCH -J filtlong
 #SBATCH --partition=medium
-#SBATCH --mem=5G
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=1G
+#SBATCH --cpus-per-task=2
 
 # INPUTS
 Reads=$1
@@ -25,7 +25,7 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -n "$MinLength" && -n "$Min
     KB=$(($MinLength / 1000))
 
     # RUN FILTLONG
-    filtlong --min_length $MinLength --min_mean_q $QualPercent $Reads | gzip > "$Prefix"_"$KB"kb_Q"$MinQual".fastq.gz
+    filtlong --min_length $MinLength --min_mean_q $QualPercent $Reads | gzip > $OutDir/"$Prefix"_"$KB"kb_Q"$MinQual".fastq.gz
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), a minimum read length (in bp), a minimum quality score (integer) and an output directory. \n"
