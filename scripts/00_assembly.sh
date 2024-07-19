@@ -68,10 +68,8 @@ echo "Running NECAT with the following parameters:"
 echo "Input: $OutDir/$Prefix/{$Prefix}_filt.fastq.gz"
 echo "Output: $OutDir/$Prefix/necat/{$Prefix}_necat.fasta"
 
-export PATH=$PATH:/mnt/shared/scratch/jnprice/apps/NECAT/Linux-amd64/bin
-
 realpath $OutDir/$Prefix/"$Prefix"_filt.fastq.gz > $OutDir/$Prefix/necat/read_list.txt
-necat.pl config $OutDir/$Prefix/necat/"$Prefix"_config.txt
+necat config $OutDir/$Prefix/necat/"$Prefix"_config.txt
 
 sed -i "s/PROJECT=/PROJECT=$Prefix/g" $OutDir/$Prefix/necat/"$Prefix"_config.txt
 sed -i 's/ONT_READ_LIST=/ONT_READ_LIST=read_list.txt/g' $OutDir/$Prefix/necat/"$Prefix"_config.txt
@@ -80,9 +78,9 @@ sed -i 's/THREADS=4/THREADS=16/g' $OutDir/$Prefix/necat/"$Prefix"_config.txt
 
 cd $OutDir/$Prefix/necat
 
-necat.pl correct $OutDir/$Prefix/necat/"$Prefix"_config.txt \
-    && necat.pl assemble $OutDir/$Prefix/necat/"$Prefix"_config.txt \
-    && necat.pl bridge $OutDir/$Prefix/necat/"$Prefix"_config.txt
+necat correct $OutDir/$Prefix/necat/"$Prefix"_config.txt \
+    && necat assemble $OutDir/$Prefix/necat/"$Prefix"_config.txt \
+    && necat bridge $OutDir/$Prefix/necat/"$Prefix"_config.txt
 
 cp $OutDir/$Prefix/necat/$Prefix/6-bridge_contigs/polished_contigs.fasta $OutDir/$Prefix/necat/"$Prefix"_necat.fasta
 
@@ -99,9 +97,8 @@ echo "Output: $OutDir/$Prefix/longpolish/{$Prefix}_racon.fasta"
 
 cd $OutDir/$Prefix/longpolish
 
-/mnt/shared/scratch/jnprice/apps/raconnn/raconnn 1 \
-    $OutDir/$Prefix/"$Prefix"_filt.fastq.gz \
-    $OutDir/$Prefix/necat/"$Prefix"_necat.fasta > $OutDir/$Prefix/longpolish/"$Prefix"_racon.fasta
+minimap2 -ax map-ont -t 16 $OutDir/$Prefix/necat/"$Prefix"_necat.fasta $OutDir/$Prefix/"$Prefix"_filt.fastq.gz > $OutDir/$Prefix/longpolish/map.sam
+racon --threads 16 $OutDir/$Prefix/"$Prefix"_filt.fastq.gz $OutDir/$Prefix/longpolish/map.sam $OutDir/$Prefix/necat/"$Prefix"_necat.fasta > $OutDir/$Prefix/longpolish/"$Prefix"_racon.fasta
 
 echo "Racon Complete"
 echo ""
@@ -113,9 +110,6 @@ echo "Input: $OutDir/$Prefix/{$Prefix}_filt.fastq.gz"
 echo "Input: $OutDir/$Prefix/longpolish/{$Prefix}_racon.fasta"
 echo "Output: $OutDir/$Prefix/final/{$Prefix}_medaka.fasta"
 
-export MYCONDAPATH=/mnt/shared/scratch/jnprice/apps/conda
-source ${MYCONDAPATH}/bin/activate pipeline-umi-amplicon
-
 medaka_consensus \
     -i $OutDir/$Prefix/"$Prefix"_filt.fastq.gz \
     -d $OutDir/$Prefix/longpolish/"$Prefix"_racon.fasta \
@@ -123,8 +117,6 @@ medaka_consensus \
     -t 12 -m r941_min_high_g360
 
 cp $OutDir/$Prefix/longpolish/consensus.fasta $OutDir/$Prefix/final/"$Prefix"_medaka.fasta
-
-conda deactivate
 
 echo "Medaka Complete"
 echo ""
@@ -138,9 +130,6 @@ echo "Output: $OutDir/$Prefix/final/BUSCO_{$Prefix}.fungi"
 
 cd $OutDir/$Prefix/final
 
-export MYCONDAPATH=/mnt/shared/scratch/jnprice/apps/conda
-source ${MYCONDAPATH}/bin/activate busco
-
 busco -m genome -c 8 -i $OutDir/$Prefix/final/"$Prefix"_medaka.fasta -o BUSCO_"$Prefix".fungi -l ~/busco_downloads/lineages/fungi_odb10
 
 conda deactivate
@@ -150,12 +139,12 @@ echo ""
 
 # Stats
 echo "**********************************************************************************"
-echo "Running Assembly Stats with the following parameters:"
+echo "Running GFAStats with the following parameters:"
 echo "Input: $OutDir/$Prefix/final/{$Prefix}_medaka.fasta"
 
-python ~/scripts/shell_scripts/genome_qc/assembly_stats.py $OutDir/$Prefix/final/"$Prefix"_medaka.fasta
+gfastats $OutDir/$Prefix/final/"$Prefix"_medaka.fasta $GenomeSize --threads 4 --tabular --nstar-report > $OutDir/$Prefix/final/"$Prefix"_genome_stats.tsv
 
-echo "Assembly Stats Complete"
+echo "GFAStats Complete"
 echo ""
 
 echo "**********************************************************************************"
