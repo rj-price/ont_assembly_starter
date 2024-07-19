@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH -J medaka
-#SBATCH --partition=long
+#SBATCH --partition=medium
 #SBATCH --mem=20G
 #SBATCH --cpus-per-task=8
 
@@ -23,9 +23,9 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -f "$Assembly" && -n "$OutD
         -i $Reads \
         -d $Assembly \
         -o $OutDir \
-        -t 12 -m r941_min_high_g360
+        -t 16 -m r941_min_high_g360
 
-    cp $OutDir/consensus.fasta $OutDir/"$Prefix"_medaka.fasta
+    mv $OutDir/consensus.fasta $OutDir/"$Prefix"_medaka.fasta
 else
     # PRINT ERROR & USAGE MESSAGES
     echo -e "\nERROR: Expected inputs not found. Please provide a FASTQ file (.fq.gz or .fastq.gz required), a Racon assembly (.fasta required) and an output directory. \n"
