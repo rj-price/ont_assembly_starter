@@ -20,7 +20,18 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -f "$Assembly" && -n "$Iter
     Prefix=$(basename "$Assembly" .fasta)
 
     # RUN RACON
-    $ScriptsDir/raconnn $Iterations $Reads $Assembly > "$OutDir"/"$Prefix"_racon.fasta
+    mkdir -p "$OutDir"/tmp
+    cp $Assembly "$OutDir"/tmp/prev.fa
+
+    for i in `seq 1 $Iterations`; do
+	echo "Polishing round $i / $Iterations"
+	minimap2 -ax map-ont -t 16 "$OutDir"/tmp/prev.fa $Reads > "$OutDir"/tmp/map.sam
+	racon --threads 16 $Reads "$OutDir"/tmp/map.sam "$OutDir"/tmp/prev.fa > "$OutDir"/tmp/polished.fa
+	mv "$OutDir"/tmp/polished.fa "$OutDir"/tmp/prev.fa
+    done
+
+    mv "$OutDir"/tmp/prev.fa "$OutDir"/"$Prefix"_racon.fasta
+    rm -rf "$OutDir"/tmp
 
 else
     # PRINT ERROR & USAGE MESSAGES
