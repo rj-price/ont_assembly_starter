@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH -J nanoplot
-#SBATCH --partition=medium
-#SBATCH --mem=4G
+#SBATCH --partition=short
+#SBATCH --mem=1G
 #SBATCH --cpus-per-task=2
 
 # INPUTS
