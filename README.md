@@ -137,7 +137,9 @@ sbatch "$scripts_dir"/06_medaka.sh \
     "$out_dir"
 ```
 
-## BUSCO
+## Assembly QC
+
+### BUSCO
 **Used as a quality control step to check number of conserved single copy orthologs present in assembly.**
 
 Set the assembly and output directories (change these to the actual paths):
@@ -151,6 +153,24 @@ Run on assembly file with the lineage fungi:
 sbatch "$scripts_dir"/XX_busco.sh \
     "$medaka_dir"/sample_name_necat_racon_medaka.fasta \
     fungi \
+    "$out_dir"
+```
+
+<br>
+
+### GFASTATS
+**Used as an assembly quality control step to check number of contigs, assembly size. contigs N50, etc.**
+
+Set the assembly and output directories (change these to the actual paths):
+```bash
+medaka_dir=/dir/to/medaka_out
+out_dir=/dir/to/output
+```
+
+Run on assembly file:
+```bash
+sbatch "$scripts_dir"/XX_gfastats.sh \
+    "$medaka_dir"/sample_name_necat_racon_medaka.fasta \
     "$out_dir"
 ```
 

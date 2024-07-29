@@ -15,22 +15,22 @@ if [[ -f "$Reads" && "$Reads" =~ \.(fq|fastq).gz$ && -n "$GenomeSize" && -n "$Ou
     Prefix=$(basename "$Reads" .fastq.gz)
 
     # CREATE OUTPUT FOLDER
-    mkdir -p "$OutDir/$Prefix"
+    mkdir -p "$OutDir"
 
     # CREATE READ LIST FILE
-    realpath "$Reads" > "$OutDir/$Prefix"/read_list.txt
+    realpath "$Reads" > "$OutDir"/read_list.txt
 
     # CREATE NECAT CONFIG FILE
-    necat config "$OutDir/$Prefix"/config.txt
+    necat config "$OutDir"/config.txt
 
     # EDIT CONFIG FILE
-    sed -i "s/PROJECT=/PROJECT=$Prefix/g" $OutDir/$Prefix/config.txt
-    sed -i 's/ONT_READ_LIST=/ONT_READ_LIST=read_list.txt/g' $OutDir/$Prefix/config.txt
-    sed -i "s/GENOME_SIZE=/GENOME_SIZE=$GenomeSize/g" $OutDir/$Prefix/config.txt
-    sed -i 's/THREADS=4/THREADS=16/g' $OutDir/$Prefix/config.txt
+    sed -i "s/PROJECT=/PROJECT=$Prefix/g" $OutDir/config.txt
+    sed -i 's/ONT_READ_LIST=/ONT_READ_LIST=read_list.txt/g' $OutDir/config.txt
+    sed -i "s/GENOME_SIZE=/GENOME_SIZE=$GenomeSize/g" $OutDir/config.txt
+    sed -i 's/THREADS=4/THREADS=16/g' $OutDir/config.txt
 
     # RUN NECAT
-    cd "$OutDir/$Prefix"
+    cd "$OutDir"
     necat correct config.txt
     necat assemble config.txt 
     necat bridge config.txt

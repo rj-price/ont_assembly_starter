@@ -5,7 +5,6 @@
 #SBATCH --cpus-per-task=8
 
 # INPUTS
-ScriptsDir=$(dirname $0)
 Reads=$1
 Assembly=$2
 Iterations=$3
